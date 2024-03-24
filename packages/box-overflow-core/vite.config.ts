@@ -4,11 +4,9 @@
  */
 import { resolve } from 'node:path'
 import { defineConfig, mergeConfig } from 'vite'
-import react from '@vitejs/plugin-react'
 import commonConfig from '../../vite.config'
 
 export default mergeConfig(commonConfig, defineConfig({
-  plugins: [react()],
   build: {
     lib: {
       entry: resolve(__dirname, 'src'),
