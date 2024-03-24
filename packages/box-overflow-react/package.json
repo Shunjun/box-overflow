@@ -1,0 +1,12 @@
+{
+  "name": "box-overflow-react",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "main": "index.js",
+  "scripts": {
+    "build": "vite build"
+  }
+}
