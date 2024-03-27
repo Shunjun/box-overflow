@@ -7,12 +7,12 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --force",
     "build": "tsc && vite build"
   },
   "dependencies": {
-    "box-overflow-react": "workspace:^",
     "react": "^18.2.0",
+    "react-box-overflow": "workspace:^",
     "react-dom": "^18.2.0",
     "unocss": "^0.58.6"
   },

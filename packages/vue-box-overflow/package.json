@@ -1,12 +1,26 @@
 {
-  "name": "box-overflow-react",
+  "name": "vue-box-overflow",
   "type": "module",
   "version": "0.0.0",
   "description": "",
   "author": "",
   "license": "ISC",
   "keywords": [],
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
   "main": "index.js",
+
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch"

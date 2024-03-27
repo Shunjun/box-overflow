@@ -4,4 +4,6 @@
  */
 import type { BoxOverflowOptions } from 'box-overflow-core'
 
-export type Options
+export interface Options extends BoxOverflowOptions {
+
+}

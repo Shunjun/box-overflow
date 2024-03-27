@@ -7,6 +7,7 @@ import process from 'node:process'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
+import { externalizeDeps } from 'vite-plugin-externalize-deps'
 
 const __dir = process.cwd()
 
@@ -30,43 +31,47 @@ export default defineConfig({
       },
     },
   },
-  plugins: [dts({
-    outDir: `dist/esm`,
-    entryRoot: resolve(__dir, 'src'),
-    include: resolve(__dir, 'src'),
-    // exclude: options.exclude,
-    compilerOptions: {
+  plugins: [
+    externalizeDeps(),
+    dts({
+      outDir: `dist/esm`,
+      entryRoot: resolve(__dir, 'src'),
+      include: resolve(__dir, 'src'),
+      // exclude: options.exclude,
+      compilerOptions: {
       // eslint-disable-next-line ts/ban-ts-comment
       // @ts-expect-error
-      module: 'ESNext',
-      declarationMap: false,
-    },
-    beforeWriteFile: (filePath, content) => {
-      content = content.replace(
-        /^(im|ex)port\s[\w{}*\s,]+from\s['"]\.\/[^.'"]+(?=['"];?$)/gm,
-        '$&.js',
-      )
+        module: 'ESNext',
+        declarationMap: false,
+      },
+      beforeWriteFile: (filePath, content) => {
+        content = content.replace(
+          /^(im|ex)port\s[\w{}*\s,]+from\s['"]\.\/[^.'"]+(?=['"];?$)/gm,
+          '$&.js',
+        )
 
-      return { filePath, content }
-    },
-  }), dts({
-    outDir: `dist/cjs`,
-    entryRoot: resolve(__dir, 'src'),
-    include: resolve(__dir, 'src'),
-    // exclude: options.exclude,
-    compilerOptions: {
+        return { filePath, content }
+      },
+    }),
+    dts({
+      outDir: `dist/cjs`,
+      entryRoot: resolve(__dir, 'src'),
+      include: resolve(__dir, 'src'),
+      // exclude: options.exclude,
+      compilerOptions: {
       // eslint-disable-next-line ts/ban-ts-comment
       // @ts-expect-error
-      module: 'CommonJS',
-      declarationMap: false,
-    },
-    beforeWriteFile: (filePath, content) => {
-      content = content.replace(
-        /^(im|ex)port\s[\w{}*\s,]+from\s['"]\.\/[^.'"]+(?=['"];?$)/gm,
-        '$&.cjs',
-      )
-      filePath = filePath.replace('.d.ts', '.d.cts')
-      return { filePath, content }
-    },
-  })],
+        module: 'CommonJS',
+        declarationMap: false,
+      },
+      beforeWriteFile: (filePath, content) => {
+        content = content.replace(
+          /^(im|ex)port\s[\w{}*\s,]+from\s['"]\.\/[^.'"]+(?=['"];?$)/gm,
+          '$&.cjs',
+        )
+        filePath = filePath.replace('.d.ts', '.d.cts')
+        return { filePath, content }
+      },
+    }),
+  ],
 })

@@ -11,8 +11,9 @@ export default mergeConfig(commonConfig, defineConfig({
   plugins: [react()],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src'),
+      entry: resolve(__dirname, 'src/index.tsx'),
       name: 'index',
     },
+    cssCodeSplit: false,
   },
 }))

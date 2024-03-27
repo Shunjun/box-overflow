@@ -5,19 +5,24 @@
 import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { faker } from '@faker-js/faker'
+import Overflow from 'react-box-overflow'
+
 import 'virtual:uno.css'
 
 function App() {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
   return (
     <div>
       <div>Max Line</div>
-      <div ref={containerRef} className="w-400px inline-block border border-solid border-green">
+      <Overflow>
         {Array.from({ length: 100 }).map((_, index) => {
-          return <span key={index} data-index={index}>{faker.person.fullName()}</span>
+          return (
+            <Overflow.Item key={index}>
+              <span key={index}>{faker.person.fullName()}</span>
+            </Overflow.Item>
+          )
         })}
-      </div>
+        <Overflow.Rest>123</Overflow.Rest>
+      </Overflow>
     </div>
   )
 }
