@@ -2,7 +2,7 @@
  * @author        shunzi <tobyzsj@gmail.com>
  * @date          2024-03-24 21:47:13
  */
-import React, { cloneElement, isValidElement, useContext } from 'react'
+import React, { cloneElement, createElement, isValidElement, useContext } from 'react'
 import type { BoxOverflow as BoxOverflowInstance, BoxOverflowOptions } from 'box-overflow-core'
 import { useOverflow } from './useOverflow'
 import type { DataType } from './types'
@@ -30,13 +30,13 @@ export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> =
   React.Children.forEach(children, (child, index) => {
     if (isValidElement(child)) {
       if ((child.type as unknown as { displayName: string }).displayName === 'BoxOverflowItem') {
-        _children.push(cloneElement (child, { id: child.key || index, ...child.props }))
         const key = child.props.id ?? child.key ?? index
+        _children.push(cloneElement (child, { key, id: key, ...child.props }))
         keyList.push(key)
       }
 
       if ((child.type as unknown as { displayName: string }).displayName === 'BoxOverflowRest')
-        rest = child
+        rest = cloneElement(child, { key: 'rest' })
     }
   })
 
@@ -46,7 +46,6 @@ export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> =
     },
     ...restProps,
     getContainer: () => containerRef.current as HTMLDivElement,
-
   })
 
   const _style: React.CSSProperties = {
@@ -75,14 +74,18 @@ interface BoxOverflowRestProps {
   children?: React.ReactNode
   className?: string
   style?: React.CSSProperties
+  component?: string
   [key: string]: any
 }
 
 export function BoxOverflowRest(props: BoxOverflowRestProps) {
+  const { component = 'div', ...restProps } = props
   const instance = useContext(BoxOverflowContext)
   const indexKey = instance.options?.keyAttribute as string
 
-  return <div {...{ ...props, [indexKey]: 'rest' }}>{props.children}</div>
+  const style = instance.getRestStyle()
+
+  return createElement(component, { ...restProps, ...props, [indexKey]: 'rest', style: { ...props.style, ...style } })
 }
 BoxOverflowRest.displayName = 'BoxOverflowRest'
 
@@ -90,15 +93,17 @@ interface BoxOverflowItemProps {
   children?: React.ReactNode
   className?: string
   style?: React.CSSProperties
-  id: string
+  component?: string
+  id?: string
   [key: string]: any
 }
 
 export function BoxOverflowItem(props: BoxOverflowItemProps) {
+  const { component = 'div', id, ...restProps } = props
   const instance = useContext(BoxOverflowContext)
   const indexKey = instance.options?.keyAttribute as string
 
-  const style = instance.getItemStyle(props.id)
-  return <div {...{ [indexKey]: props.id }} style={style}>{props.children}</div>
+  const style = instance.getItemStyle(id!)
+  return createElement(component, { ...restProps, [indexKey]: id, style: { ...props.style, ...style } })
 }
 BoxOverflowItem.displayName = 'BoxOverflowItem'

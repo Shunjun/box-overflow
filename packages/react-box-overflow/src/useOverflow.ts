@@ -3,8 +3,9 @@
  * @date          2024-03-24 21:46:59
  */
 
+import type { Measurement } from 'box-overflow-core'
 import { BoxOverflow } from 'box-overflow-core'
-import { useEffect, useReducer, useRef } from 'react'
+import { useEffect, useLayoutEffect, useReducer, useRef } from 'react'
 import type { Options } from './interface'
 
 export function useOverflow(options: Options) {
@@ -18,19 +19,20 @@ export function useOverflow(options: Options) {
     return instance.current.onMount()
   }, [])
 
-  useEffect(() => {
+  // useMemo(()=> {},[options])
+
+  useLayoutEffect(() => {
     instance.current.setOptions({
       ...options,
-      onDisplayChange: (count: number) => {
+      onDisplayChange: (measurements: Measurement[]) => {
         forceRenderer()
-        options.onDisplayChange?.(count)
+        options.onDisplayChange?.(measurements)
       },
     })
   }, [options])
 
   return {
     displayCount: instance.current.displayCount,
-    allDisplayed: instance.current.allDisplayed,
     instance: instance.current,
   }
 }
