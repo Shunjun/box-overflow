@@ -2,7 +2,7 @@
  * @author        shunzi <tobyzsj@gmail.com>
  * @date          2024-03-24 21:08:24
  */
-import React, { StrictMode, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { faker } from '@faker-js/faker'
 import Overflow from 'react-box-overflow'
@@ -10,7 +10,7 @@ import Overflow from 'react-box-overflow'
 import 'virtual:uno.css'
 
 function App() {
-  const [maxCount, setMaxCount] = useState(10)
+  const [maxLine, setMaxLine] = useState(2)
   const [dataCount, setDataCount] = useState(100)
 
   const prevList = useRef<string[]>([])
@@ -36,16 +36,18 @@ function App() {
           />
         </div>
         <div>
-          <label htmlFor="maxCount">maxCount</label>
+          <label htmlFor="maxCount">maxLine</label>
           <input
             id="maxCount"
             type="number"
-            value={maxCount}
-            onChange={e => setMaxCount(Number.parseInt(e.target.value))}
+            value={maxLine}
+            onChange={e => setMaxLine(Number.parseInt(e.target.value))}
           />
         </div>
       </div>
-      <Overflow maxCount={maxCount} className="border border-solid p-2">
+      <Overflow maxLine={maxLine} className="border border-solid p-2">
+        <Overflow.Prefix>**Prefix**</Overflow.Prefix>
+        <Overflow.Suffix>**Suffix**</Overflow.Suffix>
         {fakerData.map((data, index) => {
           return (
             <Overflow.Item key={index} id={index}>
@@ -53,7 +55,7 @@ function App() {
             </Overflow.Item>
           )
         })}
-        <Overflow.Rest>Rest</Overflow.Rest>
+        <Overflow.Rest>{(rests: string[]) => `+${rests.length}` }</Overflow.Rest>
       </Overflow>
     </div>
   )
@@ -61,7 +63,7 @@ function App() {
 
 const root = createRoot(document.getElementById('root')!)
 root.render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+  // <StrictMode>
+  <App />,
+  // </StrictMode>,
 )

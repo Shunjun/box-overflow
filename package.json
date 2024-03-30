@@ -36,8 +36,8 @@
     "dist"
   ],
   "scripts": {
-    "build:all": "nx run-many -t build",
-    "dev": "nx run-many -t dev",
+    "build:all": "nx run-many -t build --batch",
+    "dev": "nx run-many -t dev --batch",
     "lint": "nx lint",
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",

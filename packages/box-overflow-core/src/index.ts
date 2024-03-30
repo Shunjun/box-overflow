@@ -5,10 +5,10 @@
 
 import { Observer } from './observer'
 import type { SetRequired } from './types'
-import { isElementNode, notNil } from './utils'
+import { isElementNode, memo, notNil } from './utils'
 
 export interface BoxOverflowOptions {
-  keyAttribute?: string
+  idAttribute?: string
   maxCount?: number
   maxLine?: number
   /**
@@ -20,12 +20,12 @@ export interface BoxOverflowOptions {
   /**
    * 显示的数量变更
    */
-  onDisplayChange?: (count: number) => void
+  onDisplayChange?: (count: OverflowItem[]) => void
 
   getKeyByIndex?: (index: number) => string
 }
 
-interface Measurement {
+export interface OverflowItem {
   key: string
   index: number
   line: number
@@ -40,15 +40,17 @@ interface SizeRect {
   height: number
 }
 
-const internalKeys = ['rest', 'prefix', 'suffix']
+const internalFixedKeys = ['rest', 'prefix', 'suffix']
 
 export class BoxOverflow {
-  options!: SetRequired<BoxOverflowOptions, 'keyAttribute'>
-  displayCount: number | null = null
+  options!: SetRequired<BoxOverflowOptions, 'idAttribute'>
+  displayCount = 0
   isRestReady = false
   hasRest = false
+  containerElement: HTMLElement | null = null
+  sizeChanged: boolean = false
   sizeCache = new Map<string, SizeRect>()
-  measurementsCache: Measurement[] = []
+  measurementsCache: OverflowItem[] = []
   measureElementCache = new Map<string, HTMLElement>()
 
   itemsObserver = Observer.createResizeObserver(this.itemMeasurer.bind(this))
@@ -59,17 +61,21 @@ export class BoxOverflow {
     // entry: ResizeObserverEntry
   ) {
     this.measureElement(element)
+    if (this.sizeChanged)
+      this.triggerChange()
   }
 
-  containerMeasurer(element: HTMLElement, entry: ResizeObserverEntry) {
-    this.sizeCache.set('container', { width: entry.contentRect.width, height: entry.contentRect.height })
-    this.getMeasurements()
+  containerMeasurer(element: HTMLElement,
+    // entry: ResizeObserverEntry
+  ) {
+    this.measureContainer(element)
+    this.triggerChange()
   }
 
   childrenChange(mutation: MutationRecord) {
     mutation.removedNodes.forEach((node) => {
       if (isElementNode(node)) {
-        const key = this.keyOfElement(node)
+        const key = this.idOfElement(node)
         if (!key)
           return
         this.measureElementCache.delete(key)
@@ -77,7 +83,7 @@ export class BoxOverflow {
     })
     mutation.addedNodes.forEach((node) => {
       if (isElementNode(node)) {
-        const key = this.keyOfElement(node)
+        const key = this.idOfElement(node)
         if (!key)
           return
         this.measureElement(node)
@@ -94,30 +100,24 @@ export class BoxOverflow {
       ([key, value]) => typeof value === 'undefined' && delete (options as any)[key],
     )
     this.options = {
-      keyAttribute: 'data-key',
+      idAttribute: 'data-key',
       ...options,
     }
+
+    if (this.containerElement)
+      this.triggerChange()
   }
 
   onMount() {
     const container = this.options.getContainer()
     if (!container)
       return
+
+    this.containerElement = container
     this.containerObserver.observe(container)
     this.childrenObserver.observe(container)
-
-    const containerRect = container.getBoundingClientRect()
-    this.sizeCache.set('container', { width: containerRect.width, height: containerRect.height })
-
-    const children = Array.from(container.children)
-    children.forEach((child) => {
-      if (isElementNode(child)) {
-        const key = this.keyOfElement(child)
-        if (!key)
-          return
-        this.measureElement(child)
-      }
-    })
+    this.measureContainer(container)
+    this.measureElements()
 
     this.triggerChange()
 
@@ -126,19 +126,37 @@ export class BoxOverflow {
     }
   }
 
+  onUpdate() {
+    const container = this.options.getContainer()
+
+    if (container !== this.containerElement) {
+      this.destroy()
+
+      this.containerElement = container
+
+      this.containerObserver.observe(container)
+      this.childrenObserver.observe(container)
+      this.measureContainer(container)
+      this.measureElements()
+
+      this.triggerChange()
+    }
+  }
+
   destroy() {
     this.itemsObserver.disconnect()
     this.containerObserver.disconnect()
     this.childrenObserver.disconnect()
+    this.containerElement = null
+    this.measureElementCache.clear()
   }
 
-  triggerChange() {
-    const measurements = this.getMeasurements()
-    this.options.onDisplayChange?.(measurements?.length)
-  }
+  triggerChange = memo (() => ([this.getMeasurements(), this.sizeCache]), (measurements) => {
+    this.options.onDisplayChange?.(measurements)
+  })
 
-  keyOfElement(node: HTMLElement) {
-    const attributeName = this.options.keyAttribute
+  idOfElement(node: HTMLElement) {
+    const attributeName = this.options.idAttribute
     const keyStr = node.getAttribute(attributeName)
 
     if (!keyStr) {
@@ -151,47 +169,84 @@ export class BoxOverflow {
     return String(keyStr)
   }
 
-  // getKeyByIndex(index: number) {
-  //   if(index )
-  // }
+  measureElements() {
+    const container = this.containerElement
+    if (!container)
+      return
+    const children = Array.from(container.children)
+    children.forEach((child) => {
+      if (isElementNode(child)) {
+        const key = this.idOfElement(child)
+        if (!key)
+          return
+        this.measureElement(child)
+      }
+    })
+  }
 
   measureElement(node: HTMLElement) {
-    const key = this.keyOfElement(node)
+    const id = this.idOfElement(node)
 
-    // const measurement = this.measurementsCache.get(key)
-    // if (!measurement) {
-    //   this.measurerElementCache.forEach((node) => {
-    //     if (element === node) {
-    //       this.itemsObserver.unobserve(node)
-    //       this.measurerElementCache.delete(key)
-    //     }
-    //   })
-    // }
-
-    const prevNode = this.measureElementCache.get(key)
-
+    const prevNode = this.measureElementCache.get(id)
     if (node !== prevNode) {
       if (prevNode)
         this.itemsObserver.unobserve(prevNode)
       this.itemsObserver.observe(node)
-      this.measureElementCache.set(key, node)
+      this.measureElementCache.set(id, node)
     }
+
     const rect = node.getBoundingClientRect()
 
-    this.sizeCache.set(key, { width: rect.width, height: rect.height })
+    const prevSize = this.sizeCache.get(id)
+
+    if (!prevSize || prevSize.width !== rect.width || prevSize.height !== rect.height) {
+      this.sizeChanged = true
+      this.sizeCache.set(id, { width: rect.width, height: rect.height })
+    }
   }
 
-  getMaxCount() {
-    const maxCount = this.options.maxCount
-    const elementLength = Array.from(this.measureElementCache.values())
+  measureContainer(element: HTMLElement) {
+    const rect = element.getBoundingClientRect()
+    const style = window.getComputedStyle(element)
+
+    const width = rect.width - Number.parseFloat(style.paddingLeft) - Number.parseFloat(style.paddingRight) - Number.parseFloat(style.borderLeftWidth) - Number.parseFloat(style.borderRightWidth)
+    const height = rect.height - Number.parseFloat(style.paddingTop) - Number.parseFloat(style.paddingBottom) - Number.parseFloat(style.borderTopWidth) - Number.parseFloat(style.borderBottomWidth)
+
+    this.sizeCache.set('container', { width, height })
+  }
+
+  getRests = memo (() => ([this.displayCount, this.getItemCounts()]), (start, end) => {
+    if (start >= end)
+      return []
+    const rests = []
+    for (; start < end; start++) {
+      const key = this.options.getKeyByIndex?.(start)
+      if (!key)
+        continue
+      rests.push(key)
+    }
+    return rests
+  })
+
+  private getItemCounts() {
+    return Array.from(this.measureElementCache.values())
       .filter((item) => {
-        const key = this.keyOfElement(item)
-        return !internalKeys.includes(key)
+        const key = this.idOfElement(item)
+        return !internalFixedKeys.includes(key)
       }).length
+  }
+
+  private getMaxCount() {
+    const maxCount = this.options.maxCount
+
+    if (maxCount && maxCount < 1)
+      console.error('maxCount can not be less than 1')
+
+    const elementLength = this.getItemCounts()
     return maxCount ? Math.min(maxCount, elementLength) : elementLength
   }
 
-  getMaxLine() {
+  private getMaxLine() {
     const maxLine = this.options.maxLine
     if (maxLine === undefined)
       return undefined
@@ -210,14 +265,14 @@ export class BoxOverflow {
     let suffixSingleLine = false
     let top = 0
     let currentLineMaxHeight = 0
-    let hasRest = false
+    let hasRest = maxCount < this.getItemCounts()
 
-    let prevMeasurement: Measurement | null = null
-    const measurements: Measurement[] = []
+    let prevOverflow: OverflowItem | null = null
+    const overflows: OverflowItem[] = []
 
     if (prefixSize) {
       const prefixSize = this.sizeCache.get('prefix')!
-      measurements.push((prevMeasurement = {
+      overflows.push((prevOverflow = {
         key: 'prefix',
         index: 0,
         line: 0,
@@ -231,10 +286,10 @@ export class BoxOverflow {
     if (suffixSize && suffixSize.width > containerSize.width)
       suffixSingleLine = true
 
-    const genNextMeasurement = (key: string, size?: SizeRect, nextLine?: boolean) => {
-      const prevIndex = prevMeasurement?.index ?? -1
-      const prevLine = prevMeasurement?.line || 0
-      const left = nextLine ? 0 : (prevMeasurement?.left || 0) + (prevMeasurement?.width || 0)
+    const genNextItem = (key: string, size?: SizeRect, nextLine?: boolean) => {
+      const prevIndex = prevOverflow?.index ?? -1
+      const prevLine = prevOverflow?.line || 0
+      const left = nextLine ? 0 : (prevOverflow?.left || 0) + (prevOverflow?.width || 0)
       return {
         key,
         index: prevIndex + 1,
@@ -255,19 +310,19 @@ export class BoxOverflow {
 
       let nextLine = false
 
-      // const { width: currentWidth = 0, height:  = 0 } = size || {}
       const isLastOne = i === maxCount - 1
       const restWidth = isLastOne ? 0 : restSize?.width || 0
 
       const maybeMaxLine = notNil(maxLine) ? suffixSingleLine ? maxLine - 1 : maxLine : undefined
       let validWidth = containerSize.width
-      if (prevMeasurement)
-        validWidth -= prevMeasurement.left + prevMeasurement.width
+      if (prevOverflow)
+        validWidth -= prevOverflow.left + prevOverflow.width
 
       // 最后一行
-      if (notNil(maybeMaxLine) && prevMeasurement?.line === maybeMaxLine) {
+      if (notNil(maybeMaxLine) && prevOverflow?.line === maybeMaxLine) {
         validWidth -= restWidth
-        if (suffixSingleLine)
+
+        if (!suffixSingleLine)
           validWidth -= suffixSize?.width || 0
 
         if (validWidth < size.width || 0) {
@@ -285,34 +340,73 @@ export class BoxOverflow {
         }
       }
 
-      measurements.push((prevMeasurement = genNextMeasurement(key!, size, nextLine)))
+      overflows.push((prevOverflow = genNextItem(key!, size, nextLine)))
 
       currentLineMaxHeight = Math.max(currentLineMaxHeight, size.height)
     }
 
     if (hasRest)
-      measurements.push(prevMeasurement = genNextMeasurement('rest', restSize, false))
+      overflows.push(prevOverflow = genNextItem('rest', restSize, false))
 
     if (suffixSize)
-      measurements.push(prevMeasurement = genNextMeasurement('suffix', suffixSize, suffixSingleLine))
+      overflows.push(prevOverflow = genNextItem('suffix', suffixSize, suffixSingleLine))
 
-    this.measurementsCache = measurements
-    return measurements
+    return this.updateMeasurementsCache(overflows)
   }
 
-  getItemStyle(id: string) {
-    const item = this.measurementsCache.find(item => item.key === id)
+  private updateMeasurementsCache(measurements: OverflowItem[]) {
+    const isSame = measurements.length === this.measurementsCache.length
+      && measurements.every ((item, index) => {
+        return item.key === this.measurementsCache[index]?.key
+      })
 
-    const hiddenStyle = {
-      display: 'none',
-      position: 'absolute',
-      top: '-9999px',
-      left: '-9999px',
+    this.sizeChanged = false
+
+    if (!isSame) {
+      this.measurementsCache = measurements
+      const displayCount = measurements.filter(item => !internalFixedKeys.includes(item.key)).length
+      this.displayCount = displayCount
     }
 
-    if (!item)
-      return hiddenStyle
+    return this.measurementsCache
+  }
 
-    return {}
+  getContainerStyle(): Partial<CSSStyleDeclaration> {
+    const { direction } = this.options
+
+    const style: Partial<CSSStyleDeclaration> = {
+      display: 'flex',
+      flexWrap: 'wrap',
+      position: 'relative',
+    }
+    direction && (style.direction = direction)
+    return style
+  }
+
+  getItemStyle(id: string): Partial<CSSStyleDeclaration> {
+    const item = this.measurementsCache.find(item => item.key === id)
+
+    if (!item) {
+      return {
+        opacity: '0',
+        position: 'absolute',
+        top: '-9999px',
+        left: '-9999px',
+      }
+    }
+    return {
+      flexShrink: '0',
+      margin: '0',
+    }
+  }
+
+  getRestStyle(): Partial<CSSStyleDeclaration> {
+    const rest = this.measurementsCache.find(item => item.key === 'rest')
+    if (!rest)
+      return { opacity: '0', position: 'absolute', top: '-9999px', left: '-9999px' }
+    return {
+      flexShrink: '0',
+      margin: '0',
+    }
   }
 }

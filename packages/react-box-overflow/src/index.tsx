@@ -4,5 +4,6 @@
  */
 import { BoxOverflow } from './BoxOverflow'
 
+export * from './interface'
 export { useOverflow } from './useOverflow'
 export default BoxOverflow

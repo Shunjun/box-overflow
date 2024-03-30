@@ -1,11 +1,10 @@
 {
-  "name": "max-count",
+  "name": "max-line",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "license": "MIT",
   "keywords": [],
-  "main": "index.js",
   "scripts": {
     "dev": "vite --force",
     "build": "tsc && vite build"

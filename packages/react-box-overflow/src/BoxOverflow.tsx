@@ -3,19 +3,22 @@
  * @date          2024-03-24 21:47:13
  */
 import React, { cloneElement, createElement, isValidElement, useContext } from 'react'
-import type { BoxOverflow as BoxOverflowInstance, BoxOverflowOptions } from 'box-overflow-core'
+import type { BoxOverflow as BoxOverflowInstance } from 'box-overflow-core'
 import { useOverflow } from './useOverflow'
 import type { DataType } from './types'
+import { BoxOverflowRest } from './BoxOverflowRest'
+import type { BoxOverflowItemProps, BoxOverflowProps, CommonChildProps } from './interface'
+import { capitalizeFirstLetter } from './utils'
 
-const BoxOverflowContext = React.createContext<BoxOverflowInstance >({} as BoxOverflowInstance)
+export const BoxOverflowContext = React.createContext<BoxOverflowInstance >({} as BoxOverflowInstance)
 
-interface BoxOverflowProps<K extends keyof any = 'key', D extends DataType<K> = DataType<K> > extends Omit<BoxOverflowOptions, 'getContainer'> {
-  className?: string
-  style?: React.CSSProperties
-  component?: string
-  children?: React.ReactNode
-  indexKey?: keyof D
+const fixedDisplayNameMap = {
+  rest: 'BoxOverflowRest',
+  prefix: 'BoxOverflowPrefix',
+  suffix: 'BoxOverflowSuffix',
 }
+
+type FixKeys = keyof typeof fixedDisplayNameMap
 
 export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> = DataType<K>>(props: BoxOverflowProps<K, D>) {
   const { component, children, className, style, ...restProps } = props
@@ -23,24 +26,27 @@ export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> =
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   const keyList: string[] = []
-  let rest: React.ReactElement | null = null
   const _children: React.ReactNode[] = []
-  const prefix = null
-  const suffix = null
+  const fixItems: Partial<Record<FixKeys, React.ReactElement | null>> = { }
+
   React.Children.forEach(children, (child, index) => {
     if (isValidElement(child)) {
-      if ((child.type as unknown as { displayName: string }).displayName === 'BoxOverflowItem') {
-        const key = child.props.id ?? child.key ?? index
-        _children.push(cloneElement (child, { key, id: key, ...child.props }))
-        keyList.push(key)
+      const displayName = (child.type as unknown as { displayName: string }).displayName
+
+      if (displayName === 'BoxOverflowItem') {
+        const id = child.props.id ?? child.key ?? index
+        const idStr = String(id)
+        _children.push(cloneElement (child, { key: idStr, id: idStr, ...child.props }))
+        keyList.push(idStr)
       }
 
-      if ((child.type as unknown as { displayName: string }).displayName === 'BoxOverflowRest')
-        rest = cloneElement(child, { key: 'rest' })
+      const type = Object.entries(fixedDisplayNameMap).find(([_, value]) => value === displayName)?.[0]
+      if (type)
+        fixItems[type as FixKeys] = cloneElement(child, { key: type })
     }
   })
 
-  const { instance } = useOverflow({
+  const instance = useOverflow({
     getKeyByIndex: (index: number) => {
       return keyList[index]
     },
@@ -49,8 +55,7 @@ export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> =
   })
 
   const _style: React.CSSProperties = {
-    display: 'flex',
-    flexWrap: 'wrap',
+    ...instance.getContainerStyle() as React.CSSProperties,
     ...style,
   }
 
@@ -58,7 +63,7 @@ export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> =
   return (
     <BoxOverflowContext.Provider value={instance}>
       {React.createElement(_component, {
-        children: [prefix, ..._children, rest, suffix],
+        children: [fixItems.prefix, ..._children, fixItems.rest, fixItems.suffix],
         ref: containerRef,
         className,
         style: _style,
@@ -69,41 +74,32 @@ export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> =
 BoxOverflow.displayName = 'BoxOverflow'
 BoxOverflow.Rest = BoxOverflowRest
 BoxOverflow.Item = BoxOverflowItem
-
-interface BoxOverflowRestProps {
-  children?: React.ReactNode
-  className?: string
-  style?: React.CSSProperties
-  component?: string
-  [key: string]: any
-}
-
-export function BoxOverflowRest(props: BoxOverflowRestProps) {
-  const { component = 'div', ...restProps } = props
-  const instance = useContext(BoxOverflowContext)
-  const indexKey = instance.options?.keyAttribute as string
-
-  const style = instance.getRestStyle()
-
-  return createElement(component, { ...restProps, ...props, [indexKey]: 'rest', style: { ...props.style, ...style } })
-}
-BoxOverflowRest.displayName = 'BoxOverflowRest'
-
-interface BoxOverflowItemProps {
-  children?: React.ReactNode
-  className?: string
-  style?: React.CSSProperties
-  component?: string
-  id?: string
-  [key: string]: any
-}
+BoxOverflow.Suffix = genFixComponent('suffix')
+BoxOverflow.Prefix = genFixComponent('prefix')
 
 export function BoxOverflowItem(props: BoxOverflowItemProps) {
-  const { component = 'div', id, ...restProps } = props
+  const { component = 'div', id: _id, ...restProps } = props
   const instance = useContext(BoxOverflowContext)
-  const indexKey = instance.options?.keyAttribute as string
+  const idKey = instance.options?.idAttribute as string
 
-  const style = instance.getItemStyle(id!)
-  return createElement(component, { ...restProps, [indexKey]: id, style: { ...props.style, ...style } })
+  const id = String(_id)
+
+  const style = {
+    ...props.style,
+    ...instance.getItemStyle(id),
+  }
+  return createElement(component, { ...restProps, [idKey]: id, style })
 }
 BoxOverflowItem.displayName = 'BoxOverflowItem'
+
+function genFixComponent(type: 'prefix' | 'suffix') {
+  const Comp = (props: CommonChildProps) => {
+    const { component = 'div', ...restProps } = props
+    const instance = useContext(BoxOverflowContext)
+    const idKey = instance.options?.idAttribute as string
+
+    return createElement(component, { ...restProps, [idKey]: type })
+  }
+  Comp.displayName = `BoxOverflow${capitalizeFirstLetter(type)}`
+  return Comp
+}
