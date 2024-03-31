@@ -1,0 +1,23 @@
+{
+  "name": "max-count",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "author": "Shunzi <tobyzsj@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite --force",
+    "build": "vue-tsc && vite build"
+  },
+  "dependencies": {
+    "unocss": "^0.58.8",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vue-tsc": "^2.0.6"
+  }
+}

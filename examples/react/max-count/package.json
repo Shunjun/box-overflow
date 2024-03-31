@@ -2,9 +2,8 @@
   "name": "max-count",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "Shunzi <tobyzsj@gmail.com>",
   "license": "MIT",
-  "keywords": [],
   "main": "index.js",
   "scripts": {
     "dev": "vite --force",
@@ -14,7 +13,7 @@
     "react": "^18.2.0",
     "react-box-overflow": "workspace:^",
     "react-dom": "^18.2.0",
-    "unocss": "^0.58.6"
+    "unocss": "^0.58.8"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
