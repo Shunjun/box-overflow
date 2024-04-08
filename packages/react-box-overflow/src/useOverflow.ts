@@ -2,16 +2,16 @@
  * @author        shunzi <tobyzsj@gmail.com>
  * @date          2024-03-24 21:46:59
  */
-import type { OverflowItem } from 'box-overflow-core'
+import type { BoxOverflowOptions, OverflowItem } from 'box-overflow-core'
 import { BoxOverflow } from 'box-overflow-core'
 import { useEffect, useLayoutEffect, useReducer, useRef } from 'react'
-import type { Options } from './interface'
+
 import { useRefFn } from './useRefFn'
 
 const useIsomorphicLayoutEffect
   = typeof document !== 'undefined' ? useLayoutEffect : useEffect
 
-export function useOverflow(options: Options) {
+export function useOverflow(options: BoxOverflowOptions) {
   const [,forceRenderer] = useReducer (() => {
     return []
   }, [])

@@ -3,5 +3,5 @@
   "compilerOptions": {
     "lib": ["DOM"]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src/**/*", "vite.config.ts"]
 }

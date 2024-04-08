@@ -20,10 +20,9 @@
     "./package.json": "./package.json"
   },
   "main": "index.js",
-
   "scripts": {
     "build": "vite build",
-    "dev": "vite build --watch --force"
+    "dev": "vite build --watch"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
@@ -37,6 +36,18 @@
   "devDependencies": {
     "@types/react": "^18.2.69",
     "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react": "^4.2.1"
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.2.7"
+  },
+  "nx": {
+    "tags": ["react", "box-overflow"],
+    "targets": {
+      "build": {
+        "dependsOn": ["^build"]
+      },
+      "dev": {
+        "dependsOn": ["^build"]
+      }
+    }
   }
 }

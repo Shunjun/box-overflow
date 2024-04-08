@@ -5,7 +5,7 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { faker } from '@faker-js/faker'
-import Overflow from 'react-box-overflow'
+import { BoxOverflow } from 'react-box-overflow'
 
 import 'virtual:uno.css'
 
@@ -45,18 +45,18 @@ function App() {
           />
         </div>
       </div>
-      <Overflow maxLine={maxLine} className="border border-solid p-2">
-        <Overflow.Prefix>**Prefix**</Overflow.Prefix>
-        <Overflow.Suffix>**Suffix**</Overflow.Suffix>
+      <BoxOverflow maxLine={maxLine} className="border border-solid p-2">
+        <BoxOverflow.Prefix>**Prefix**</BoxOverflow.Prefix>
+        <BoxOverflow.Suffix>**Suffix**</BoxOverflow.Suffix>
         {fakerData.map((data, index) => {
           return (
-            <Overflow.Item key={index} id={index}>
+            <BoxOverflow.Item key={index} id={index}>
               <span key={index}>{data}</span>
-            </Overflow.Item>
+            </BoxOverflow.Item>
           )
         })}
-        <Overflow.Rest>{(rests: string[]) => `+${rests.length}` }</Overflow.Rest>
-      </Overflow>
+        <BoxOverflow.Rest>{(rests: string[]) => `+${rests.length}` }</BoxOverflow.Rest>
+      </BoxOverflow>
     </div>
   )
 }

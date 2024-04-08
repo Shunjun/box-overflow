@@ -1,8 +1,11 @@
 {
+  "composite": true,
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react",
-    "lib": ["dom"]
+    "baseUrl": ".",
+    "declaration": false,
+    "declarationMap": false
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src/**/*", "vite.config.ts"]
 }

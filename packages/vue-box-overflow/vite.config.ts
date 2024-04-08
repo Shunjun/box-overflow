@@ -4,13 +4,14 @@
  */
 import { resolve } from 'node:path'
 import { defineConfig, mergeConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
 import commonConfig from '../../vite.config'
 
 export default mergeConfig(commonConfig, defineConfig({
-  plugins: [],
+  plugins: [vue()],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.tsx'),
+      entry: resolve(__dirname, 'src/index.ts'),
       name: 'index',
     },
   },

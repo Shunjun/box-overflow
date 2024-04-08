@@ -2,12 +2,9 @@
  * @author        shunzi <tobyzsj@gmail.com>
  * @date          2024-03-24 21:47:58
  */
+import type React from 'react'
 import type { BoxOverflowOptions } from 'box-overflow-core'
 import type { DataType } from './types'
-
-export interface Options extends BoxOverflowOptions {
-
-}
 
 export interface BoxOverflowProps<K extends keyof any = 'key', D extends DataType<K> = DataType<K> > extends Omit<BoxOverflowOptions, 'getContainer'> {
   className?: string

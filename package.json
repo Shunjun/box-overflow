@@ -37,7 +37,7 @@
   ],
   "scripts": {
     "build:all": "nx run-many -t build --batch",
-    "dev": "nx run-many -t dev --batch",
+    "dev": "nx run-many -t dev --batch --projects=tag:box-overflow",
     "lint": "nx lint",
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",

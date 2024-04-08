@@ -4,14 +4,15 @@
  */
 import { resolve } from 'node:path'
 import { defineConfig, mergeConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+
+// import react from '@vitejs/plugin-react'
 import commonConfig from '../../vite.config'
 
 export default mergeConfig(commonConfig, defineConfig({
-  plugins: [react()],
+  plugins: [],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.tsx'),
+      entry: resolve(__dirname, 'src'),
       name: 'index',
     },
     cssCodeSplit: false,

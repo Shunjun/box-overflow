@@ -4,7 +4,7 @@
  */
 
 import { Observer } from './observer'
-import type { SetRequired } from './types'
+import type { CSSProperties, SetRequired } from './types'
 import { isElementNode, memo, notNil } from './utils'
 
 export interface BoxOverflowOptions {
@@ -21,7 +21,6 @@ export interface BoxOverflowOptions {
    * 显示的数量变更
    */
   onDisplayChange?: (count: OverflowItem[]) => void
-
   getKeyByIndex?: (index: number) => string
 }
 
@@ -100,7 +99,7 @@ export class BoxOverflow {
       ([key, value]) => typeof value === 'undefined' && delete (options as any)[key],
     )
     this.options = {
-      idAttribute: 'data-key',
+      idAttribute: 'data-id',
       ...options,
     }
 
@@ -111,7 +110,7 @@ export class BoxOverflow {
   onMount() {
     const container = this.options.getContainer()
     if (!container)
-      return
+      return () => {}
 
     this.containerElement = container
     this.containerObserver.observe(container)
@@ -176,8 +175,8 @@ export class BoxOverflow {
     const children = Array.from(container.children)
     children.forEach((child) => {
       if (isElementNode(child)) {
-        const key = this.idOfElement(child)
-        if (!key)
+        const id = this.idOfElement(child)
+        if (!id)
           return
         this.measureElement(child)
       }
@@ -371,10 +370,10 @@ export class BoxOverflow {
     return this.measurementsCache
   }
 
-  getContainerStyle(): Partial<CSSStyleDeclaration> {
+  getContainerStyle(): Partial<CSSProperties> {
     const { direction } = this.options
 
-    const style: Partial<CSSStyleDeclaration> = {
+    const style: CSSProperties = {
       display: 'flex',
       flexWrap: 'wrap',
       position: 'relative',
@@ -383,7 +382,7 @@ export class BoxOverflow {
     return style
   }
 
-  getItemStyle(id: string): Partial<CSSStyleDeclaration> {
+  getItemStyle(id: string): Partial<CSSProperties> {
     const item = this.measurementsCache.find(item => item.key === id)
 
     if (!item) {
@@ -400,13 +399,16 @@ export class BoxOverflow {
     }
   }
 
-  getRestStyle(): Partial<CSSStyleDeclaration> {
+  getRestStyle(): Partial<CSSProperties> {
     const rest = this.measurementsCache.find(item => item.key === 'rest')
-    if (!rest)
-      return { opacity: '0', position: 'absolute', top: '-9999px', left: '-9999px' }
-    return {
-      flexShrink: '0',
-      margin: '0',
+    if (!rest) {
+      return {
+        opacity: '0',
+        position: 'absolute',
+        top: '-9999px',
+        left: '-9999px',
+      }
     }
+    return {}
   }
 }

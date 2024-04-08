@@ -28,5 +28,13 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch --force"
+  },
+  "nx": {
+    "tags": [
+      "box-overflow"
+    ]
+  },
+  "devDependencies": {
+    "csstype": "^3.1.3"
   }
 }

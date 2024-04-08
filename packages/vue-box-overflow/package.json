@@ -20,23 +20,40 @@
     "./package.json": "./package.json"
   },
   "main": "index.js",
-
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
-    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "vue": "^3.0.0"
   },
   "dependencies": {
     "box-overflow-core": "workspace:^",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+
+    "vue": "^3.4.21"
   },
   "devDependencies": {
-    "@types/react": "^18.2.69",
-    "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react": "^4.2.1"
+    "@vitejs/plugin-vue": "^5.0.4",
+    "typescript": "^5.4.3",
+    "vite": "^5.2.7",
+    "vue-tsc": "^2.0.6"
+  },
+  "nx": {
+    "tags": [
+      "vue",
+      "box-overflow"
+    ],
+    "targets": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ]
+      },
+      "dev": {
+        "dependsOn": [
+          "^build"
+        ]
+      }
+    }
   }
 }

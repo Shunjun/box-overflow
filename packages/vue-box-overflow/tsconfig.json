@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "lib": ["dom"]
+    "jsx": "preserve",
+    "lib": ["dom"],
+    "baseUrl": "."
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src/**/*", "vite.config.ts"]
 }
