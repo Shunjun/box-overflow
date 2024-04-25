@@ -21,7 +21,7 @@ export interface BoxOverflowOptions {
    * 显示的数量变更
    */
   onDisplayChange?: (count: OverflowItem[]) => void
-  getKeyByIndex?: (index: number) => string
+  getIdByIndex?: (index: number) => string
 }
 
 export interface OverflowItem {
@@ -219,7 +219,7 @@ export class BoxOverflow {
       return []
     const rests = []
     for (; start < end; start++) {
-      const key = this.options.getKeyByIndex?.(start)
+      const key = this.options.getIdByIndex?.(start)
       if (!key)
         continue
       rests.push(key)
@@ -301,7 +301,7 @@ export class BoxOverflow {
     }
 
     for (let i = 0; i < maxCount; i++) {
-      const key = this.options.getKeyByIndex?.(i)
+      const key = this.options.getIdByIndex?.(i)
       const size = this.sizeCache.get(key!)
 
       if (!size && size !== null)

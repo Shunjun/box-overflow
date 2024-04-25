@@ -11,7 +11,7 @@ export interface BoxOverflowProps<K extends keyof any = 'key', D extends DataTyp
   style?: React.CSSProperties
   component?: string
   children?: React.ReactNode
-  indexKey?: keyof D
+  idKey?: keyof D
 }
 
 export interface CommonChildProps extends React.HTMLAttributes<HTMLElement> {

@@ -92,7 +92,7 @@ export function BoxOverflow<K extends keyof any = 'key', D extends DataType<K> =
   })
 
   const instance = useOverflow({
-    getKeyByIndex: (index: number) => {
+    getIdByIndex: (index: number) => {
       return keyList[index]
     },
     ...restProps,

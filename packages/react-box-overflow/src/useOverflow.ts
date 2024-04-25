@@ -37,10 +37,7 @@ export function useOverflow(options: BoxOverflowOptions) {
   })
 
   useLayoutEffect(() => {
-    instance.current.setOptions({
-      ...options,
-      onDisplayChange,
-    })
+    instance.current.setOptions(mergedOptions)
   }, [options])
 
   return instance.current

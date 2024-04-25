@@ -6,6 +6,7 @@
                     {{ item }}
                 </div>
             </template>
+            <div  data-id= 'rest'>+123</div>
         </div>
     </div>
 </template>
@@ -20,7 +21,7 @@ const data = ref(Array.from({ length: 100 }).map(() => faker.lorem.sentence()))
 const container = ref(null)
 const instance = useOverflow({
     getContainer: () => container.value as unknown as HTMLElement,
-    getKeyByIndex: (index) => data.value[index],
+    getIdByIndex: (index) => data.value[index],
     maxLine: 3
 })
 
