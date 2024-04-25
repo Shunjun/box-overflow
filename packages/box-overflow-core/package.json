@@ -1,11 +1,20 @@
 {
   "name": "box-overflow-core",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Headless UI for automatically collapsing boxes when overflow.",
   "author": "Shunzi <tobyzsj@gmail.com>",
   "license": "MIT",
-  "keywords": ["overflow", "react", "vue", "box-overflow-core", "box-overflow", "rc-overflow", "react-box-overflow", "vue-box-overflow"],
+  "keywords": [
+    "overflow",
+    "react",
+    "vue",
+    "box-overflow-core",
+    "box-overflow",
+    "rc-overflow",
+    "react-box-overflow",
+    "vue-box-overflow"
+  ],
   "exports": {
     ".": {
       "import": {
