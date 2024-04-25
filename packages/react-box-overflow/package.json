@@ -1,11 +1,17 @@
 {
   "name": "react-box-overflow",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Headless UI for automatically collapsing boxes when overflow in React.",
   "author": "Shunzi <tobyzsj@gmail.com>",
   "license": "MIT",
-  "keywords": ["overflow", "react", "box-overflow-core", "box-overflow", "rc-overflow"],
+  "keywords": [
+    "overflow",
+    "react",
+    "box-overflow-core",
+    "box-overflow",
+    "rc-overflow"
+  ],
   "exports": {
     ".": {
       "import": {
@@ -41,13 +47,20 @@
     "vite": "^5.2.7"
   },
   "nx": {
-    "tags": ["react", "box-overflow"],
+    "tags": [
+      "react",
+      "box-overflow"
+    ],
     "targets": {
       "build": {
-        "dependsOn": ["^build"]
+        "dependsOn": [
+          "^build"
+        ]
       },
       "dev": {
-        "dependsOn": ["^build"]
+        "dependsOn": [
+          "^build"
+        ]
       }
     }
   }
