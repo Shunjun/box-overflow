@@ -1,11 +1,17 @@
 {
   "name": "vue-box-overflow",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Headless UI for automatically collapsing boxes when overflow in Vue.",
   "author": "Shunzi <tobyzsj@gmail.com>",
   "license": "MIT",
-  "keywords": ["overflow", "vue", "box-overflow-core", "box-overflow", "rc-overflow"],
+  "keywords": [
+    "overflow",
+    "vue",
+    "box-overflow-core",
+    "box-overflow",
+    "rc-overflow"
+  ],
   "exports": {
     ".": {
       "import": {
@@ -30,7 +36,6 @@
   },
   "dependencies": {
     "box-overflow-core": "workspace:^",
-
     "vue": "^3.4.21"
   },
   "devDependencies": {
